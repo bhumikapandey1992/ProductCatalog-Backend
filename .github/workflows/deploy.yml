@@ -1,0 +1,47 @@
+name: 🚀 Deploy to EC2
+
+# 1) Trigger this workflow on every push to main
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    # 2) Run the job on a fresh Ubuntu runner.
+    runs-on: ubuntu-latest
+
+    steps:
+      # 3)  Checkout your repo so we can reference its name
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # full history, needed for git pull
+
+      # 4) Install the SSH client so we can ssh over to EC2
+      - name: Install SSH client
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
+
+      # 5) Load your deploy key into an ssh‐agent
+      - name: Load SSH key
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      # 6) SSH into EC2 and run your deploy command
+      - name: Deploy via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+           -A \
+              ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e                          # fail on any command error
+            # add GitHub’s host key so ssh won’t complain.
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+            # If the directory doesn't exist, clone it:
+            if [ ! -d "${{ github.event.repository.name }}" ]; then
+            git clone git@github.com:bhumikapandey1992/${{ github.event.repository.name }}.git
+            fi
+            cd ~/${{ github.event.repository.name }}  # enter the cloned folder
+            git pull origin main           # pull the latest changes
+            docker compose up -d --build   # rebuild & restart containers
+            docker image prune -f          # clean up old images
+          EOF

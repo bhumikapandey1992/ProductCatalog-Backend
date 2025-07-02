@@ -1,0 +1,30 @@
+services:
+  db:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Nagina_123
+      MYSQL_DATABASE:     product_catalog
+      MYSQL_ROOT_HOST:    '%'
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: .          # or ./backend if your compose is one level up
+      dockerfile: Dockerfile
+    depends_on:
+      - db                # <-- this dash makes it a list
+    environment:
+      DB_HOST:     db
+      DB_PORT:     3306
+      DB_USER:     root
+      DB_PASSWORD: Nagina_123
+      DB_NAME:     product_catalog
+    ports:
+      - "8000:8000"
+
+volumes:
+  db_data:
