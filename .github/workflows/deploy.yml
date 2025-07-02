@@ -1,6 +1,6 @@
 name: 🚀 Deploy to EC2
 
-# 1) Trigger this workflow on every push to main
+# 1) Trigger this workflow on every push to main.
 on:
   push:
     branches: [ main ]
