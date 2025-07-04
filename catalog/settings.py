@@ -89,7 +89,7 @@ DATABASES = {
         'NAME':     os.getenv('DB_NAME',     'product_catalog'),
         'USER':     os.getenv('DB_USER',     'root'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'Nagina_123'),
-        'HOST':     os.getenv('DB_HOST',     'localhost'),       # <-- must be "db"
+        'HOST':     os.getenv('DB_HOST',     'db'),       # <-- must be "db"
         'PORT':     os.getenv('DB_PORT',     '3306'),
     }
 }
